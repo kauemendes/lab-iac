@@ -5,6 +5,7 @@ module "aws_prd" {
   aws_region = "us-west-1"
   env_name = "DEV"
   ami_id = "ami-0819a8650d771b8be"
+  # aws_security_group = "PRD"
 }
 
 output "ip" {

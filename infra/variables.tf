@@ -23,3 +23,8 @@ variable "env_name" {
   type        = string
   description = "Env Name"
 }
+
+# variable "aws_security_group" {
+#   type        = string
+#   description = "Security Group"
+# }
