@@ -1,6 +1,5 @@
 resource "aws_security_group" "general_access" {
-  name        = "general_access"
-  description = "Dev Group Allow all inbound traffic"
+  name        = var.aws_security_group
 
   ingress{
     cidr_blocks = ["0.0.0.0/0"]

@@ -24,7 +24,20 @@ variable "env_name" {
   description = "Env Name"
 }
 
-# variable "aws_security_group" {
-#   type        = string
-#   description = "Security Group"
-# }
+variable "aws_security_group" {
+  type        = string
+  description = "Security Group"
+}
+
+variable "autoscaling_group_name" {
+  type        = string
+  description = "Autoscaling Group Name"
+}
+variable "autoscaling_group_min_size" {
+  type        = number
+  description = "Autoscaling Group Name"
+}
+variable "autoscaling_group_max_size" {
+  type        = number
+  description = "Autoscaling Group Name"
+}
