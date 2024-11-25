@@ -22,7 +22,7 @@ resource "aws_launch_template" "template-server" {
     Env  = "Env-${var.env_name}"
   }
   security_group_names = [var.aws_security_group]
-  user_data            = filebase64("ansible.sh")
+  user_data            = var.is_prod ? filebase64("ansible.sh") : ""
 }
 
 resource "aws_key_pair" "chavessh-dev" {
@@ -40,7 +40,27 @@ resource "aws_autoscaling_group" "app_server" {
     version = "$Latest"
   }
   desired_capacity  = 1
-  target_group_arns = [aws_lb_target_group.target_group.arn]
+  target_group_arns = var.is_prod ? [aws_lb_target_group.target_group[0].arn] : []
+}
+
+resource aws_autoscaling_schedule "scale_up" {
+  scheduled_action_name  = "scale_up"
+  min_size               = 0
+  max_size               = 1
+  desired_capacity       = var.is_prod ? 1 : 0
+  recurrence             = "0 6 * * *"
+  start_time             = timeadd(timestamp(), "10m")
+  autoscaling_group_name = aws_autoscaling_group.app_server.name
+}
+
+resource aws_autoscaling_schedule "scale_down" {
+  scheduled_action_name  = "scale_down"
+  min_size               = 0
+  max_size               = 1
+  desired_capacity       = 0
+  recurrence             = "0 2 * * *"
+  start_time             = timeadd(timestamp(), "11m")
+  autoscaling_group_name = aws_autoscaling_group.app_server.name
 }
 
 resource "aws_default_subnet" "subnet_1" {
@@ -58,6 +78,7 @@ resource "aws_lb" "load_balancer" {
   internal = false
   name     = "app-server"
   subnets  = [aws_default_subnet.subnet_1.id, aws_default_subnet.subnet_2.id]
+  count    = var.is_prod ? 1 : 0
 }
 
 resource "aws_lb_target_group" "target_group" {
@@ -65,16 +86,18 @@ resource "aws_lb_target_group" "target_group" {
   port     = "8000"
   protocol = "HTTP"
   vpc_id   = aws_default_vpc.default_vpc.id
+  count    = var.is_prod ? 1 : 0
 }
 
 resource "aws_lb_listener" "lb_listener" {
-  load_balancer_arn = aws_lb.load_balancer.arn
+  load_balancer_arn = aws_lb.load_balancer[0].arn
   port              = "80"
   protocol          = "HTTP"
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.target_group.arn
+    target_group_arn = aws_lb_target_group.target_group[0].arn
   }
+  count = var.is_prod ? 1 : 0
 }
 
 resource "aws_autoscaling_policy" "scale_up_policy_prd" {
@@ -88,8 +111,5 @@ resource "aws_autoscaling_policy" "scale_up_policy_prd" {
     # threshold = 50% de CPU
     target_value = 50.0
   }
+  count = var.is_prod ? 1 : 0
 }
-
-# output "public_ip" {
-#   value = aws_instance.app_server.public_ip
-# }

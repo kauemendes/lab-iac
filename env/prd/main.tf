@@ -9,6 +9,7 @@ module "aws_prd" {
   autoscaling_group_name     = "ASG-PRD"
   autoscaling_group_min_size = 1
   autoscaling_group_max_size = 10
+  is_prod                    = true
 }
 
 # output "ip" {

@@ -41,3 +41,8 @@ variable "autoscaling_group_max_size" {
   type        = number
   description = "Autoscaling Group Name"
 }
+
+variable "is_prod" {
+  type        = bool
+  description = "Is Production"
+}
